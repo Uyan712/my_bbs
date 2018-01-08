@@ -1,8 +1,8 @@
 <?php
 
-require_once __DIR__ . '/auth.php';
-require_once __DIR__ . '/utils.php';
-require_once __DIR__ . '/DbManager.php';
+require_once __DIR__ . '/library/php/auth.php';
+require_once __DIR__ . '/library/php/utils.php';
+require_once __DIR__ . '/library/php/DbManager.php';
 
 require_unlogined_session();
 
@@ -10,11 +10,11 @@ require_unlogined_session();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   // ユーザから受け取ったユーザ名とパスワードを取得
-  $username = filter_input(INPUT_POST, 'username', FILTER_CALLBACK, array('options' => 'e'));
-  $password = filter_input(INPUT_POST, 'password', FILTER_CALLBACK, array('options' => 'e'));
+  $username = filter_input(INPUT_POST, 'username');
+  $password = filter_input(INPUT_POST, 'password');
   
   // 生成されたトークンを取得
-  $token = filter_input(INPUT_POST, 'token', FILTER_CALLBACK, array('options' => 'e'));
+  $token = filter_input(INPUT_POST, 'token');
 
   try {
     // データベースへの接続を確立
@@ -43,11 +43,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // IDとユーザ名をセット
     $_SESSION['id'] = $user_data['id'];
     $_SESSION['username'] = $username;
-    // ログイン完了後に / に遷移
-    header('Location: /');
-  }
+    // ログイン完了後に index.php に遷移
+    header('Location: http://' . $_SERVER['HTTP_HOST'] . '/index.php');
   // 認証が失敗したとき
-  else {
+  } else {
     //「403 Forbidden」を送信
     http_response_code(403);
   }
@@ -58,21 +57,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <title>ログインページ</title>
+  <title>ログイン</title>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" type="text/css" href="./library/css/bootstrap.min.css">
+
+  <!-- JavaScript -->
+  <script src="./library/js/jquery-3.2.1.min.js"></script>
+  <script src="./library/js/popper.js"></script>
+  <script src="./library/js/bootstrap.min.js"></script>
 </head>
 <body>
-  <h1>掲示板へようこそ！</h1>
-  <p>ログインして下さい．</p>
-  <form method="post" action="">
-    Username : <input type="text" name="username" value=""><br>
-    Password : <input type="password" name="password" value=""><br>
-    <input type="hidden" name="token" value="<?= e(generate_token()) ?>">
-    <input type="submit" value="ログイン">
-  </form>
-  <a href="./registration.php">ユーザー登録</a>
-  <?php if (http_response_code() === 403): ?>
-    <p style="color: red;">ユーザ名またはパスワードが違います．</p>
-  <?php endif; ?>
+  <div class="container">
+    <div class="row" style="height: 60px;"></div>
+
+    <div class="row">
+      <div class="container-fluid">
+        <div class="row">
+          <h1 class="mx-auto">掲示板へようこそ！</h1>
+        </div>
+
+        <div class="row"><p class="mx-auto">ログインして下さい．</p></div>
+
+        <div class="row justify-content-center mt-3">
+          <form class="w-100 " method="post" action="">
+            <div class="form-group row w-50 mx-auto">
+              <label for="inputUsername" class="col-md-3 col-form-label">Username</label>
+              <div class="col-md-9">
+                <input type="text" name="username" class="form-control" id="inputUsername" placeholder="Enter Username">
+              </div>
+            </div>
+            <div class="form-group row w-50 mx-auto">
+              <label for="inputPassword" class="col-md-3 col-form-label">Password</label>
+              <div class="col-md-9">
+                <input type="password" name="password" class="form-control" id="inputPassword" placeholder="Enter Password">
+              </div>
+            </div>
+            <input type="hidden" name="token" value="<?= e(generate_token()) ?>">
+            <div style="text-align: center; margin-top: 20px;"><button type="submit" class="btn btn-primary">ログイン</button></div>
+          </form>
+        </div>
+
+      <div class="row justify-content-center mt-3">
+        <a href="http://<?= $_SERVER['HTTP_HOST'] ?>/registration.php">ユーザー登録</a>
+      </div>
+
+      <div class="row justify-content-center mt-2 text-danger">
+        <?php if (http_response_code() === 403): ?>
+          <p>ユーザ名またはパスワードが間違っています．</p>
+        <?php endif; ?>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

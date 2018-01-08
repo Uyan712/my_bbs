@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/library/php/auth.php';
 require_logined_session();
 
 // CSRFトークンを検証
@@ -24,4 +24,4 @@ if (isset($_COOKIE[session_name()])) {
 // セッションを破棄
 session_destroy();
 // ログアウト完了後に /login.php に遷移
-header('Location: /login.php');
+header('Location: http://' . $_SERVER['HTTP_HOST'] . '/login.php');
